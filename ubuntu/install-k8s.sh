@@ -26,13 +26,11 @@ apt-mark hold \
 echo 'KUBELET_EXTRA_ARGS="--fail-swap-on=false"' >/etc/default/kubelet
 systemctl restart kubelet
 
-cat <<EOF >/etc/netplan/60-k8s.yml
+cat <<EOF >/etc/netplan/99-k8s.yaml
 network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    eth0:
-      link-local: []
+    ethernets:
+        eth0:
+            link-local: []
 EOF
 netplan apply
 
@@ -46,6 +44,10 @@ net.ipv6.conf.eth0.disable_ipv6 = 1
 net.ipv6.conf.lo.disable_ipv6 = 1
 EOF
 sysctl --system
+sysctl -p
+
+sed -ri 's/^GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash ipv6.disable=1"/' /etc/default/grub
+update-grub
 
 # install helm
 HELM_V="3.7.1"
