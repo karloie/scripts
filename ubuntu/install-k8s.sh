@@ -34,7 +34,7 @@ network:
 EOF
 netplan apply
 
-cat <<EOF >/etc/sysctl.d/20-k8s.conf
+cat <<EOF >/etc/sysctl.d/99-k8s.conf
 net.ipv4.ip_forward=1
 net.bridge.bridge-nf-call-iptables = 1
 net.ipv6.conf.all.disable_ipv6 = 1
@@ -46,7 +46,7 @@ EOF
 sysctl --system
 sysctl -p
 
-sed -ri 's/^GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash ipv6.disable=1"/' /etc/default/grub
+echo 'GRUB_CMDLINE_LINUX_DEFAULT="${GRUB_CMDLINE_LINUX_DEFAULT} ipv6.disable=1"' >> /etc/default/grub.d/ipv6-disable.cfg
 update-grub
 
 # install helm
