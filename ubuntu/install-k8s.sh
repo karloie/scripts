@@ -26,18 +26,7 @@ apt-mark hold \
 echo 'KUBELET_EXTRA_ARGS="--fail-swap-on=false"' >/etc/default/kubelet
 systemctl restart kubelet
 
-cat <<EOF >/etc/sysctl.conf
-net.ipv4.ip_forward=1
-net.bridge.bridge-nf-call-iptables = 1
-net.ipv6.conf.all.disable_ipv6 = 1
-net.ipv6.conf.default.disable_ipv6 = 1
-net.ipv6.conf.docker0.disable_ipv6 = 1
-net.ipv6.conf.eth0.disable_ipv6 = 1
-net.ipv6.conf.lo.disable_ipv6 = 1
-EOF
-sysctl -p
-
-cat <<EOF >/etc/netplan/51-ipv6-disable.yml
+cat <<EOF >/etc/netplan/60-k8s.yml
 network:
   version: 2
   renderer: networkd
@@ -46,6 +35,17 @@ network:
       link-local: []
 EOF
 netplan apply
+
+cat <<EOF >/etc/sysctl.d/20-k8s.conf
+net.ipv4.ip_forward=1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.docker0.disable_ipv6 = 1
+net.ipv6.conf.eth0.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+EOF
+sysctl --system
 
 # install helm
 HELM_V="3.7.1"
